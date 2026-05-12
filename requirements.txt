@@ -1,0 +1,9 @@
+faster-qwen3-tts
+fastapi
+uvicorn[standard]
+pydantic
+realtimestt
+sounddevice
+requests
+numpy
+python-dotenv

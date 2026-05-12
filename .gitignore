@@ -1,0 +1,41 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+
+# Virtual environments
+venv/
+env/
+.venv/
+.env/
+fasterqwen/
+whisperx/
+
+# Secrets
+.env
+
+# # Audio files — add your reference audio manually, don't commit it
+# *.mp3
+# *.wav
+# *.opus
+# *.ogg
+# *.flac
+# *.m4a
+
+# DeepFilter binary — download separately (see README)
+*.exe
+
+# Tool output directories
+output_*/
+out/
+
+# Logs
+*.log
+
+# IDE
+.vscode/
+.idea/
+
+old_ref
