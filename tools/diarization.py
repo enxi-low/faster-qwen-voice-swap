@@ -1,15 +1,18 @@
 import json
 import os
 import subprocess
+import sys
 import argparse
 import librosa
 import soundfile as sf
 import numpy as np
 from pathlib import Path
 from collections import defaultdict
+from dotenv import load_dotenv
 
 
 def process_audio(audio_path, output_dir):
+    load_dotenv()
     audio_path = Path(audio_path)
     output_dir = Path(output_dir)
 
@@ -21,7 +24,8 @@ def process_audio(audio_path, output_dir):
         )
 
     subprocess.run([
-        "whisperx", str(audio_path),
+        sys.executable, "-m", "whisperx",
+        str(audio_path),
         "--language", "en",
         "--diarize",
         "--hf_token", hf_token,
