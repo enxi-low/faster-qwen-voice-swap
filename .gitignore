@@ -25,6 +25,9 @@ whisperx/
 # *.flac
 # *.m4a
 
+# Folder to store reference audio
+data/
+
 # DeepFilter binary — download separately (see README)
 *.exe
 

@@ -31,9 +31,9 @@ recorder = None
 response_queue = queue.Queue()
 
 language: str = "English"
-ref_audio: str = "audio.wav"
+ref_audio: str = "data/audio.wav"
 ref_text: str = ""
-ref_text_path: str = "text.txt"
+ref_text_path: str = "data/text.txt"
 chunk_size: int = 8
 
 stt_task = None
