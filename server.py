@@ -4,12 +4,10 @@ import os
 import base64
 import json
 import queue
-import shutil
-import tempfile
 import threading
 
 from RealtimeSTT.audio_recorder import AudioToTextRecorder
-from fastapi import FastAPI, File, HTTPException, Response, Request, UploadFile
+from fastapi import FastAPI, Form, HTTPException, Response, Request
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 import numpy as np
@@ -24,16 +22,14 @@ except ImportError:
 app = FastAPI(title="FasterQwen3TTS Server")
 
 model = None
-warmup_ref_audio = None
-warmup_ref_text = None
+ref_audio: str = ""
+ref_text: str = ""
+has_warmed_up = False
 
 recorder = None
 response_queue = queue.Queue()
 
 language: str = "English"
-ref_audio: str = "data/audio.wav"
-ref_text: str = ""
-ref_text_path: str = "data/text.txt"
 chunk_size: int = 8
 
 stt_task = None
@@ -49,35 +45,33 @@ class VoiceCloneRequest(BaseModel):
 
 @app.on_event("startup")
 async def load_model():
-    global model, ref_text
+    global model, ref_text, recorder, stt_task
     print("Loading FasterQwen3TTS model...")
     model = FasterQwen3TTS.from_pretrained("Qwen/Qwen3-TTS-12Hz-0.6B-Base")
     print("Model loaded.")
 
-    if warmup_ref_audio and warmup_ref_text:
+    if ref_text and ref_audio:
         print("Running warm-up inference (CUDA graph capture)...")
-        def run_warmup():
-            for _ in model.generate_voice_clone_streaming(
-                text="Hello.",
-                language="English",
-                ref_audio=warmup_ref_audio,
-                ref_text=warmup_ref_text,
-                chunk_size=8,
-            ):
-                pass
         await asyncio.to_thread(run_warmup)
         print("Warm-up complete. Server ready.")
     else:
         print("No --ref-audio provided — first request will trigger CUDA warm-up and be slower.")
-    
-        if os.path.exists(ref_text_path):
-            with open(ref_text_path, "r", encoding="utf-8") as f:
-                ref_text = f.read()
 
-    global recorder
     recorder = AudioToTextRecorder(language="en", use_microphone=False, post_speech_silence_duration=0.4)
-    global stt_task
     stt_task = asyncio.create_task(stt_worker())
+
+
+def run_warmup():
+    global has_warmed_up
+    has_warmed_up = True
+    for _ in model.generate_voice_clone_streaming(
+        text="Hello.",
+        language="English",
+        ref_audio=warmup_ref_audio,
+        ref_text=warmup_ref_text,
+        chunk_size=8,
+    ):
+        pass
 
 
 @app.on_event("shutdown")
@@ -167,37 +161,23 @@ async def generate_voice(request: VoiceCloneRequest):
 
 
 @app.post("/set_ref_voice")
-async def set_ref_voice(audio: UploadFile = File(...), text: UploadFile = File(...)):
-    global ref_text
-
-    os.makedirs(os.path.dirname(ref_audio) or ".", exist_ok=True)
-    os.makedirs(os.path.dirname(ref_text_path) or ".", exist_ok=True)
-    tmp_audio_path = None
+async def set_ref_voice(
+    audio_path: str = Form(...),
+    text: str = Form(...)
+):
+    global ref_audio, ref_text
     try:
-        # Handle audio
-        fd, tmp_audio_path = tempfile.mkstemp(
-            suffix=".wav",
-            dir=os.path.dirname(ref_audio) or ".",
-        )
-        with os.fdopen(fd, "wb") as f:
-            shutil.copyfileobj(audio.file, f)
-        os.replace(tmp_audio_path, ref_audio)
-
-        # Handle text
-        content = await text.read()
-        ref_text = content.decode("utf-8")
-        with open(ref_text_path, "w", encoding="utf-8") as f:
-            f.write(ref_text)
+        if not os.path.exists(audio_path):
+            return {"ok": False, "error": f"Audio file not found: {audio_path}"}
+        ref_audio = audio_path
+        ref_text = text
 
     except Exception as e:
         return {"ok": False, "error": str(e)}
-
-    finally:
-        await audio.close()
-        await text.close()
-        if tmp_audio_path and os.path.exists(tmp_audio_path):
-            os.remove(tmp_audio_path)
-
+    
+    if not has_warmed_up:
+        await asyncio.to_thread(run_warmup)
+    
     return {"ok": True}
 
 
@@ -209,7 +189,7 @@ if __name__ == "__main__":
     parser.add_argument("--port", type=int, default=8000)
     args = parser.parse_args()
 
-    warmup_ref_audio = args.ref_audio
-    warmup_ref_text = args.ref_text
+    ref_audio = args.ref_audio
+    ref_text = args.ref_text
 
     uvicorn.run(app, host=args.host, port=args.port)
