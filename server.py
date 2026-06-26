@@ -75,7 +75,7 @@ async def load_model():
                 ref_text = f.read()
 
     global recorder
-    recorder = AudioToTextRecorder(language="en", use_microphone=False, post_speech_silence_duration=0.5)
+    recorder = AudioToTextRecorder(language="en", use_microphone=False, post_speech_silence_duration=0.4)
     global stt_task
     stt_task = asyncio.create_task(stt_worker())
 
