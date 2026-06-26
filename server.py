@@ -49,7 +49,7 @@ class VoiceCloneRequest(BaseModel):
 
 @app.on_event("startup")
 async def load_model():
-    global model
+    global model, ref_text
     print("Loading FasterQwen3TTS model...")
     model = FasterQwen3TTS.from_pretrained("Qwen/Qwen3-TTS-12Hz-0.6B-Base")
     print("Model loaded.")
