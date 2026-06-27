@@ -22,6 +22,13 @@ def process_audio(audio_path, output_dir):
             "HF_TOKEN environment variable not set. "
             "Get a token at https://huggingface.co/settings/tokens"
         )
+    
+    ROOT = Path(__file__).resolve().parent.parent
+    BIN_DIR = ROOT / "bin"
+
+    os.environ["PATH"] = (
+        str(BIN_DIR) + os.pathsep + os.environ.get("PATH", "")
+    )
 
     subprocess.run([
         sys.executable, "-m", "whisperx",
