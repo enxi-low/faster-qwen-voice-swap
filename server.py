@@ -67,8 +67,8 @@ def run_warmup():
     for _ in model.generate_voice_clone_streaming(
         text="Hello.",
         language="English",
-        ref_audio=warmup_ref_audio,
-        ref_text=warmup_ref_text,
+        ref_audio=ref_audio,
+        ref_text=ref_text,
         chunk_size=8,
     ):
         pass
@@ -85,7 +85,7 @@ async def shutdown():
 async def stt_worker():
     while True:
         text = await asyncio.to_thread(recorder.text)
-        if text:
+        if text and has_warmed_up:
             print("STT transcription received: %s", text)
             response_queue.put(
                 await generate_voice(
