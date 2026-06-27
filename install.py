@@ -5,8 +5,6 @@ import platform
 import shutil
 import subprocess
 import sys
-import tempfile
-import zipfile
 from pathlib import Path
 
 DEEPFILTER_VERSION = "0.5.6"
@@ -65,72 +63,34 @@ def download_deepfilter():
         )
 
     print(f"Downloading {filename}...")
-
-    download(
-        f"{DEEPFILTER_BASE_URL}/{filename}",
-        DEEPFILTER
-    )
-
+    download(f"{DEEPFILTER_BASE_URL}/{filename}", DEEPFILTER)
     if system != "Windows":
         os.chmod(DEEPFILTER, 0o755)
-
     print("DeepFilter installation complete.")
 
 
 def download_ffmpeg_windows():
-    if FFMPEG.exists() and FFPROBE.exists():
-        print("FFmpeg already exists. Skipping download.")
-        return
-
-    url = "https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip"
-
-    with tempfile.TemporaryDirectory() as tmp:
-        tmp = Path(tmp)
-
-        zip_path = tmp / "ffmpeg.zip"
-
-        print("Downloading FFmpeg...")
-
-        download(url, zip_path)
-
-        print("Extracting FFmpeg...")
-
-        with zipfile.ZipFile(zip_path) as z:
-            z.extractall(tmp)
-
-        ffmpeg = None
-        ffprobe = None
-
-        for file in tmp.rglob("ffmpeg.exe"):
-            ffmpeg = file
-            break
-
-        for file in tmp.rglob("ffprobe.exe"):
-            ffprobe = file
-            break
-
-        if ffmpeg is None or ffprobe is None:
-            raise RuntimeError("FFmpeg archive is missing binaries.")
-
-        shutil.copy2(ffmpeg, FFMPEG)
-        shutil.copy2(ffprobe, FFPROBE)
+    print("Starting ffmpeg download")
+    subprocess.check_call(["winget","install", "FFmpeg (Essentials Build)"])
 
 
-def ensure_ffmpeg_linux():
+def download_ffmpeg_linux():
+    print("Starting ffmpeg download")
     subprocess.check_call(["sudo", "apt-get", "install", "-y", "ffmpeg"])
 
 
-def ensure_ffmpeg_macos():
+def download_ffmpeg_macos():
     if not shutil.which("brew"):
         raise RuntimeError(
             "Please install Homebrew or install FFmpeg manually and set on PATH."
         )
 
+    print("Starting ffmpeg download")
     subprocess.check_call(["brew", "install", "ffmpeg"])
 
 
 def install_ffmpeg():
-    if shutil.which("ffmpeg") and shutil.which("ffprobe"):
+    if shutil.which("ffmpeg"):
         print("FFmpeg already installed.")
         return
 
@@ -139,9 +99,9 @@ def install_ffmpeg():
     if system == "Windows":
         download_ffmpeg_windows()
     elif system == "Linux":
-        ensure_ffmpeg_linux()
+        download_ffmpeg_linux()
     elif system == "Darwin":
-        ensure_ffmpeg_macos()
+        download_ffmpeg_macos()
     else:
         raise RuntimeError(f"Unsupported platform: {system}")
     
