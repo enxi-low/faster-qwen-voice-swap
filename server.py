@@ -78,26 +78,33 @@ def run_warmup():
 async def shutdown():
     if stt_task:
         stt_task.cancel()
+        try:
+            await stt_task
+        except asyncio.CancelledError:
+            pass
     if recorder:
-        recorder.stop()
+        recorder.shutdown()
 
 
 async def stt_worker():
-    while True:
-        text = await asyncio.to_thread(recorder.text)
-        if text and has_warmed_up:
-            print("STT transcription received: %s", text)
-            response_queue.put(
-                await generate_voice(
-                    VoiceCloneRequest(
-                        text=text,
-                        language=language,
-                        ref_audio=ref_audio,
-                        ref_text=ref_text,
-                        chunk_size=chunk_size,
+    try:
+        while True:
+            text = await asyncio.to_thread(recorder.text)
+            if text and has_warmed_up:
+                print("STT transcription received: %s", text)
+                response_queue.put(
+                    await generate_voice(
+                        VoiceCloneRequest(
+                            text=text,
+                            language=language,
+                            ref_audio=ref_audio,
+                            ref_text=ref_text,
+                            chunk_size=chunk_size,
+                        )
                     )
                 )
-            )
+    except asyncio.CancelledError:
+        pass
 
 
 @app.get("/health")
