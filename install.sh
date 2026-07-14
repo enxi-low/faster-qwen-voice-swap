@@ -1,3 +1,4 @@
+#!/bin/bash
 set -e
 ORIGINAL_DIR=$(pwd)
 
@@ -15,7 +16,7 @@ if [ ! -d ".venv" ]; then
 fi
 
 source .venv/bin/activate
-pip install --upgrade pip
+python -m pip install --upgrade pip
 pip install -r requirements.txt
 
 echo Installation for stt-tts complete
@@ -27,7 +28,7 @@ if [ ! -d ".venv_tools" ]; then
 fi
 
 source .venv_tools/bin/activate
-pip install --upgrade pip
+python -m pip install --upgrade pip
 pip install -r requirements-tools.txt
 
 python install.py

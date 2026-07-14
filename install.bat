@@ -18,7 +18,7 @@ if not exist .venv (
 )
 
 call .venv\Scripts\activate.bat
-call pip install --upgrade pip
+call python -m pip install --upgrade pip
 call pip install -r requirements.txt || exit /b 1
 
 echo Installation for stt-tts complete
@@ -30,7 +30,7 @@ if not exist .venv_tools (
 )
 
 call .venv_tools\Scripts\activate.bat
-call pip install --upgrade pip
+call python -m pip install --upgrade pip
 call pip install -r requirements-tools.txt || exit /b 1
 
 python install.py || exit /b 1
