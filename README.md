@@ -64,7 +64,7 @@ Edit .env and set HF_TOKEN=your_token
 
 ### 1. Get a reference voice sample
 
-You need a clean 10â€“30s audio clip of the target voice and its transcript.
+You need a clean 10–30s audio clip of the target voice and its transcript.
 
 **Already have a clean clip?** Skip to step 2.
 
@@ -102,7 +102,7 @@ Speak into your mic. Your words will play back in the cloned voice.
 
 ```
 server.py                     FastAPI server wrapping Qwen3-TTS
-client.py                     Mic â†’ STT â†’ server â†’ speaker
+client.py                     Mic → STT → server → speaker
 prepare_voice.py              CLI: denoise + diarize a recording
 install.py                    DeepFilter, FFmpeg, and Hugging Face token setup
 requirements.txt              Runtime environment
