@@ -13,7 +13,7 @@ A local FastAPI server runs the Qwen3-TTS model and streams audio chunks back. A
 ## Prerequisites
 
 - Python 3.12 installed before running the installer
-- NVIDIA CUDA GPU for the 3 Swap Cam integration
+- NVIDIA CUDA GPU
 - [ffmpeg](https://ffmpeg.org/) on PATH (for voice preparation tools)
 - A Hugging Face account/token with access to [pyannote speaker diarization 3.1](https://huggingface.co/pyannote/speaker-diarization-3.1) when using the voice preparation tools
 
