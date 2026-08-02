@@ -1,13 +1,14 @@
+import argparse
 import json
 import os
 import subprocess
 import sys
-import argparse
-import librosa
-import soundfile as sf
-import numpy as np
-from pathlib import Path
 from collections import defaultdict
+from pathlib import Path
+
+import librosa
+import numpy as np
+import soundfile as sf
 from dotenv import load_dotenv
 
 
@@ -31,7 +32,6 @@ def process_audio(audio_path, output_dir):
         "--hf_token", hf_token,
         "--output_dir", str(output_dir),
         "--output_format", "json",
-        "--min_speakers", "2",
     ], check=True)
 
     with open(output_dir / f"{audio_path.stem}.json", "r", encoding="utf-8") as f:

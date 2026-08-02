@@ -30,7 +30,7 @@ class AudioCleaner:
         if result.returncode != 0:
             raise RuntimeError(f"DeepFilter failed: {result.stderr}")
 
-        cleaned_path = output_dir / "out" / "cleaned_audio.wav"
+        cleaned_path = output_dir / "out" / Path(input_to_clean).name
         if not cleaned_path.exists():
             raise FileNotFoundError(f"Cleaned audio not found at {cleaned_path}")
 
