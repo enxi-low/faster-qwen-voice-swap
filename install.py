@@ -117,14 +117,21 @@ def set_hf_token():
 
     print(
         "\nBefore continuing, please accept the pyannote model licence:\n"
-        "https://huggingface.co/pyannote/speaker-diarization-3.1"
+        "https://huggingface.co/pyannote/speaker-diarization-3.1\n"
+        "This is required for stt-tts voice cleaning."
     )
-    input("Press Enter after you have accepted the licence...")
+    input(
+        "Press Enter after you have accepted the licence or wish to skip"
+    )
 
     token = input(
         "Enter your Hugging Face token "
         "(https://huggingface.co/settings/tokens): "
+        "or leave it blank to skip"
     ).strip()
+
+    if not token:
+        print("No token found. Skipping .env creation.")
 
     with env_file.open("a", encoding="utf-8") as f:
         if env_file.stat().st_size > 0:
